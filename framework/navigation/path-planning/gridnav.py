@@ -26,13 +26,14 @@ import time
 import math
 
 from .abstract_algorithm import AbstractAlgorithm
-from exceptions import NoPathException
+from .exceptions.no_path_exception import NoPathException
 
 
 class GridNav(AbstractAlgorithm):
     """
     A grid based navigation algorithm for mobile robots. Closest to the
-    Shortest Path soultion presented by Dijkstra.
+    Shortest Path solution presented by Dijkstra but with a gradient
+    descent heading calculator that can produce smooth paths.
     """
 
     def __init__(self, map_state):
@@ -45,20 +46,18 @@ class GridNav(AbstractAlgorithm):
 
         AbstractAlgorithm.__init__(self, map_state)
 
-        self.planner_name = "GridNav"
+        self.planner_name = type(self).__name__
 
         # GridNav constants.
-        self.BIG_COST = 500  # Highest cost for a cell.
+        self.BIG_COST = float("inf")
         self.EMPTY = -1
         self.FULL = 1
         self.SCHEDULED = 0
         self.NOT_SCHEDULED = 1
+        self.SQRT2 = 1.4142136
 
         # Expressed in cells, move 0.15m in real world units.
         self.MAX_VELOCITY = 0.15 / self.map_state.cell_size
-
-        # Move at least a cell every time.
-        #self.MAX_VELOCITY = 1.42  # Just over the SQRT2.
 
         # Linked list stuff.
         self.open_list = []
@@ -97,7 +96,7 @@ class GridNav(AbstractAlgorithm):
                 data = GridNavData(self)
 
                 '''
-                If it's a cell on the boundary, set it up to be an obstacle,
+                If it is a cell on the boundary, set it up to be an obstacle,
                 and scheduled. This will prevent expanding nodes out of bounds.
                 '''
                 if ((x == 0) or (x == (self.map_state.cells_square - 1)) or
@@ -106,7 +105,7 @@ class GridNav(AbstractAlgorithm):
                     data.scheduled = self.SCHEDULED
                 elif x == self.map_state.goal_x and y == self.map_state.goal_y:
                     data.cost = 0
-                elif self.map_state.grid[x][y].state == 2:  # Occupied
+                elif self.map_state.grid[x][y].state == 2:
                     data.occupancy = self.FULL
 
                 self.map_state.grid[x][y].data = data
@@ -218,10 +217,10 @@ class GridNav(AbstractAlgorithm):
             while j <= y + 1:
                 if (i == x) or (j == y):
                     # If horizontal or vertical neighbor, cost is 1.0.
-                    temp_cost = self.map_state.grid[i][j].data.cost + 1
+                    temp_cost = self.map_state.grid[i][j].data.cost + 1.0
                 else:
                     # If diagonal neighbor, cost is SQRT2.
-                    temp_cost = self.map_state.grid[i][j].data.cost + 1.4142136  # SQRT2
+                    temp_cost = self.map_state.grid[i][j].data.cost + self.SQRT2
 
                 if temp_cost < low_cost:  # If lowest cost so far, reset tracking variables.
                     low_cost = temp_cost
@@ -394,10 +393,12 @@ class GridNav(AbstractAlgorithm):
         if 0.5 >= x_difference >= -0.5 and 0.5 >= y_difference >= -0.5:
             return
         else:
-            # Ensure that the next more will be into another cell
-            # otherwise we'll end up in an infinite loop.
-            #
-            # Moves towards the neighbouring cell with the lowest cost
+            '''
+            Ensure that the next more will be into another cell
+            otherwise we'll end up in an infinite loop.
+
+            Moves towards the neighbouring cell with the lowest cost
+            '''
             if int(math.floor(next_x)) == x or int(math.floor(next_y)) == y:
                 lowest = [x - 1, y + 1]  # First direction, top left cell from current.
 

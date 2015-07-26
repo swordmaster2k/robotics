@@ -1,3 +1,18 @@
+"""
+    abstract_algorithm.py
+
+    Copyright (C) 2014 Joshua Michael Daly
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+"""
 
 
 class AbstractAlgorithm:
@@ -15,13 +30,13 @@ class AbstractAlgorithm:
         :return:
         """
 
-        self.planner_name = "Abstract"
+        self.planner_name = type(self).__name__
 
         self.map_state = map_state
         self.robot = self.map_state.robot
 
         self.path = []  # Contains a list of (x, y) points in cell units.
-        self.do_smooth_path = True  # Enable global path smoothing?
+        self.do_smooth_path = False # Enable global path smoothing?
 
         # For debugging.
         self.vertex_accesses = 0  # Number of times any vertex is accessed.
@@ -49,7 +64,7 @@ class AbstractAlgorithm:
         """
         Pops the next point from the current path.
 
-        Returns the next point to travel too, or -1 if there are none.
+        Returns the next point, or -1 if there is none.
 
         :return:
         """
@@ -63,7 +78,7 @@ class AbstractAlgorithm:
     def update_occupancy_grid(self, cells):
         """
         Subclass should use this method to update the state of its
-        occupancy grid based on the updated cells provided.
+        occupancy-grid based on the updated cells provided.
 
         :param cells:
         :return:
