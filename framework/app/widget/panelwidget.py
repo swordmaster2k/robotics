@@ -3,5 +3,7 @@ from kivy.uix.button import Button
 
 
 class PanelWidget(Button):
-    def __int__(self):
+    def __init__(self):
+        Button.__init__(self)
+
         return
