@@ -6,8 +6,14 @@ from kivy.uix.label import Label
 
 
 class ToolbarWidget(BoxLayout):
-    def __init__(self, **kwargs):
+    """
+
+    """
+
+    def __init__(self, app, **kwargs):
         BoxLayout.__init__(self, **kwargs)
+
+        self.app = app
 
         self.spacing = 10
         self.padding = [10, 10, 325, 10]
@@ -51,7 +57,7 @@ class ToolbarWidget(BoxLayout):
         self.add_widget(self.speed_slider)
 
     def new_button_on_press(self, instance):
-        print("new")
+        self.app.create_new_map()
 
     def open_button_on_press(self, instance):
         print("open")
@@ -60,13 +66,13 @@ class ToolbarWidget(BoxLayout):
         print("save")
 
     def start_button_on_press(self, instance):
-        print("start")
+        self.app.brush = "start"
 
     def goal_button_on_press(self, instance):
-        print("goal")
+        self.app.brush = "goal"
 
     def obstacle_button_on_press(self, instance):
-        print("obstacle")
+        self.app.brush = "obstacle"
 
     def run_button_on_press(self, instance):
         print("run/pause")

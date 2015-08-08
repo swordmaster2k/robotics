@@ -16,20 +16,21 @@ class MapWidget(Widget):
     path_point_color = ListProperty([0, 1, 1, 1])
     path_line_color = ListProperty([1, 0, 1, 1])
 
-    grid_spacing = NumericProperty(30.0)  # Number of pixels between each grid line.
     grid_line_width = NumericProperty(1)  # Width of grid lines.
     grid_line_color = ListProperty([1, 1, 1, 1])  # Color of grid lines in RGBA.
     grid_outline_color = ListProperty([1, 1, 1, 1])  # Color of line around grid.
     grid_outline_width = NumericProperty(1)  # Width of grid outline.
     grid_location = StringProperty('behind')  # Location of grid lines, takes 'behind' or 'on_top'.
 
-    def __init__(self, map_model, robot, path):
+    def __init__(self, app, map_model, robot, path):
         """
 
         :param map_model:
         :return:
         """
         Widget.__init__(self)
+
+        self.app = app
 
         self.map_model = map_model
         self.robot = robot
@@ -55,12 +56,43 @@ class MapWidget(Widget):
                      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
+    def set_map(self, config):
+        self.cell_size = 30.0
+        self.cells_square = 10
+        self.squared_size = self.cell_size * self.cells_square
+
+        self.goal_x = 7
+        self.goal_y = 7
+        self.robot_x = 1
+        self.robot_y = 1
+        self.path = [[2.5, 2.5], [3.5, 3.5], [3.5, 4.5], [3.5, 5.5], [4.5, 6.5], [5.5, 7.5], [6.5, 7.5], [7.5, 7.5]]
+        self.grid = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                     [1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
+                     [1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
+                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+
+        self.draw()
+
     def on_touch_down(self, touch):
         x = int(touch.pos[0] / self.cell_size)
         y = int(touch.pos[1] / self.cell_size)
 
-        if x < self.cells_square and y < self.cells_square:
-            self.grid[x][y] = 1
+        if 0 < x < self.cells_square - 1 and 0 < y < self.cells_square - 1:
+            if self.app.brush == "start":
+                self.robot_x = x
+                self.robot_y = y
+            elif self.app.brush == "goal":
+                self.goal_x = x
+                self.goal_y = y
+            else:
+                self.grid[x][y] ^= 1
+
             self.draw()
 
     def on_size(self, instance, value):
@@ -115,7 +147,7 @@ class MapWidget(Widget):
             width = self.cell_size * self.cells_square + self.cell_size
             height = width
             iterations = 0
-            grid_spacing = self.grid_spacing
+            grid_spacing = self.cell_size
 
             # Draw grid interior.
             with canvas:
