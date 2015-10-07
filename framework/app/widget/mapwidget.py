@@ -57,27 +57,34 @@ class MapWidget(Widget):
                      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
     def set_map(self, config):
-        self.cell_size = 30.0
-        self.cells_square = 10
+        self.grid = []
+        self.cell_size = config[2]
+        self.cells_square = int(config[0])
         self.squared_size = self.cell_size * self.cells_square
 
-        self.goal_x = 7
-        self.goal_y = 7
+        self.goal_x = self.cells_square - 2
+        self.goal_y = self.cells_square - 2
         self.robot_x = 1
         self.robot_y = 1
-        self.path = [[2.5, 2.5], [3.5, 3.5], [3.5, 4.5], [3.5, 5.5], [4.5, 6.5], [5.5, 7.5], [6.5, 7.5], [7.5, 7.5]]
-        self.grid = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+
+        self.grid.append([1] * self.cells_square)
+        self.add_grid_row(self.cells_square - 2)
+        self.grid.append([1] * self.cells_square)
 
         self.draw()
+
+    def add_grid_row(self, rows):
+        row = [0] * self.cells_square
+        row[0] =  1
+        row[self.cells_square - 1] = 1
+        self.grid.append(row)
+
+        rows -= 1
+
+        if rows == 0:
+            return
+        else:
+            self.add_grid_row(rows)
 
     def on_touch_down(self, touch):
         x = int(touch.pos[0] / self.cell_size)
