@@ -33,7 +33,7 @@ class RobotApp(App):
         :return:
         """
 
-        self.map_widget = MapWidget(self, None, None, None)
+        self.map_widget = MapWidget(self)
         self.panel_widget = PanelWidget()
         self.toolbar_widget = ToolbarWidget(self, orientation="horizontal")
 
@@ -64,12 +64,8 @@ class RobotApp(App):
     def on_popup_ok_button(self, instance):
         content = self.popup.content
 
-        config = (float(content.width_text_input.text),
-                  float(content.height_text_input.text,),
-                  float(content.cell_text_input.text))
-
         self.popup.dismiss()
-        self.map_widget.set_map(config)
+        self.map_widget.create_new_map(float(content.size_text_input.text), float(content.cell_text_input.text))
 
     def on_popup_cancel_button(self, instance):
         self.popup.dismiss()

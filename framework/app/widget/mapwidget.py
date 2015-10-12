@@ -2,6 +2,9 @@ from kivy.uix.widget import Widget
 from kivy.graphics import Color, Line, Rectangle
 from kivy.properties import NumericProperty, ListProperty, StringProperty
 
+from model.map import Map
+from model.robot import Robot
+
 
 class MapWidget(Widget):
     """
@@ -22,167 +25,193 @@ class MapWidget(Widget):
     grid_outline_width = NumericProperty(1)  # Width of grid outline.
     grid_location = StringProperty('behind')  # Location of grid lines, takes 'behind' or 'on_top'.
 
-    def __init__(self, app, map_model, robot, path):
+    def __init__(self, app):
+        """
+
+        :param app:
+        :return:
+        """
+        Widget.__init__(self)
+
+        self.METER_TO_PIXEL_SCALE = 100
+
+        self.app = app
+
+        self.map_model = None
+        self.robot = None
+        self.path = []
+        self.goal = None
+        self.create_new_map(3, 0.3)
+
+    def create_new_map(self, grid_size, cell_size):
+        """
+
+        :param grid_size:
+        :param cell_size:
+        :return:
+        """
+        self.robot = Robot()
+        self.robot.x = 1
+        self.robot.y = 1
+        self.path = []
+        self.map_model = Map(self.robot, grid_size, cell_size)
+        self.goal = self.map_model.goal
+
+        self.draw()
+
+    def set_map(self, map_model):
         """
 
         :param map_model:
         :return:
         """
-        Widget.__init__(self)
-
-        self.app = app
-
         self.map_model = map_model
-        self.robot = robot
-        self.path = path
-
-        self.cell_size = 30.0
-        self.cells_square = 10
-        self.squared_size = self.cell_size * self.cells_square
-
-        self.goal_x = 7
-        self.goal_y = 7
-        self.robot_x = 1
-        self.robot_y = 1
-        self.path = [[2.5, 2.5], [3.5, 3.5], [3.5, 4.5], [3.5, 5.5], [4.5, 6.5], [5.5, 7.5], [6.5, 7.5], [7.5, 7.5]]
-        self.grid = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
-
-    def set_map(self, config):
-        self.grid = []
-        self.cell_size = config[2]
-        self.cells_square = int(config[0])
-        self.squared_size = self.cell_size * self.cells_square
-
-        self.goal_x = self.cells_square - 2
-        self.goal_y = self.cells_square - 2
-        self.robot_x = 1
-        self.robot_y = 1
-
-        self.grid.append([1] * self.cells_square)
-        self.add_grid_row(self.cells_square - 2)
-        self.grid.append([1] * self.cells_square)
+        self.robot = map_model.robot
+        self.path = map_model.path
+        self.goal = map_model.goal
 
         self.draw()
 
-    def add_grid_row(self, rows):
-        row = [0] * self.cells_square
-        row[0] =  1
-        row[self.cells_square - 1] = 1
-        self.grid.append(row)
-
-        rows -= 1
-
-        if rows == 0:
-            return
-        else:
-            self.add_grid_row(rows)
-
     def on_touch_down(self, touch):
-        x = int(touch.pos[0] / self.cell_size)
-        y = int(touch.pos[1] / self.cell_size)
+        """
 
-        if 0 < x < self.cells_square - 1 and 0 < y < self.cells_square - 1:
+        :param touch:
+        :return:
+        """
+        x = int(touch.pos[0] / (self.map_model.cell_size * self.METER_TO_PIXEL_SCALE))
+        y = int(touch.pos[1] / (self.map_model.cell_size * self.METER_TO_PIXEL_SCALE))
+
+        if 0 < x < self.map_model.cells_square - 1 and 0 < y < self.map_model.cells_square - 1:
             if self.app.brush == "start":
-                self.robot_x = x
-                self.robot_y = y
+                self.robot.x = x
+                self.robot.y = y
             elif self.app.brush == "goal":
-                self.goal_x = x
-                self.goal_y = y
+                self.goal.x = x
+                self.goal.y = y
             else:
-                self.grid[x][y] ^= 1
+                self.map_model.grid[x][y].state ^= 1
 
             self.draw()
 
     def on_size(self, instance, value):
+        """
+
+        :param instance:
+        :param value:
+        :return:
+        """
         self.draw()
 
     def draw(self):
+        """
+
+        :return:
+        """
         self.canvas.before.clear()
         self.canvas.after.clear()
 
         canvas = self.canvas.before
 
         self.draw_cells(canvas)
-        self.draw_path(canvas)
+
+        if len(self.path) > 0:
+            self.draw_path(canvas)
+
         self.draw_grid(canvas)
 
     def draw_cells(self, canvas):
+        """
+
+        :param canvas:
+        :return:
+        """
         with canvas:
-            for x in range(self.cells_square):
-                for y in range(self.cells_square):
-                    if x == self.goal_x and y == self.goal_y:
+            for x in range(self.map_model.cells_square):
+                for y in range(self.map_model.cells_square):
+                    if x == self.goal.x and y == self.goal.y:
                         Color(rgba=self.cell_goal_color)
-                    elif x == self.robot_x and y == self.robot_y:
+                    elif x == self.robot.x and y == self.robot.y:
                         Color(rgba=self.cell_robot_color)
-                    elif self.grid[x][y] == 0:
+                    elif self.map_model.grid[x][y].state == 0:
                         Color(rgba=self.cell_empty_color)
                     else:
                         Color(rgba=self.cell_full_color)
 
-                    Rectangle(pos=(x * self.cell_size, y * self.cell_size), size=(self.cell_size, self.cell_size))
+                    cell_size = self.map_model.cell_size * self.METER_TO_PIXEL_SCALE
+                    Rectangle(pos=(x * cell_size, y * cell_size), size=(cell_size, cell_size))
 
     def draw_path(self, canvas):
+        """
+
+        :param canvas:
+        :return:
+        """
+        cell_size = self.map_model.cell_size * self.METER_TO_PIXEL_SCALE
+
         for i in range(len(self.path) - 1):
             with canvas:
                 Color(rgba=self.path_line_color)
                 Line(width=self.path_line_width,
-                     points=(self.path[i][0] * self.cell_size,
-                             self.path[i][1] * self.cell_size,
-                             self.path[i + 1][0] * self.cell_size,
-                             self.path[i + 1][1] * self.cell_size))
+                     points=(self.path[i][0] * cell_size,
+                             self.path[i][1] * cell_size,
+                             self.path[i + 1][0] * cell_size,
+                             self.path[i + 1][1] * cell_size))
 
                 Color(rgba=self.path_point_color)
-                Rectangle(pos=(self.path[i][0] * self.cell_size - 2.5, self.path[i][1] * self.cell_size - 2.5),
+                Rectangle(pos=(self.path[i][0] * cell_size - 2.5, self.path[i][1] * cell_size - 2.5),
                           size=(5, 5))
 
         with canvas:
-            Rectangle(pos=(self.path[len(self.path) - 1][0] * self.cell_size - 2.5,
-                           self.path[len(self.path) - 1][1] * self.cell_size - 2.5),
+            Rectangle(pos=(self.path[len(self.path) - 1][0] * cell_size - 2.5,
+                           self.path[len(self.path) - 1][1] * cell_size - 2.5),
                       size=(5, 5))
 
     def draw_grid(self, canvas):
+        """
+
+        :param canvas:
+        :return:
+        """
         if self.grid_location == 'behind':
-            width = self.cell_size * self.cells_square + self.cell_size
+            width = (self.map_model.cell_size * self.map_model.cells_square) * self.METER_TO_PIXEL_SCALE
             height = width
+
             iterations = 0
-            grid_spacing = self.cell_size
+            temp_width = width + (self.map_model.cell_size * self.METER_TO_PIXEL_SCALE)
+            temp_height = height + (self.map_model.cell_size * self.METER_TO_PIXEL_SCALE)
+            grid_spacing = self.map_model.cell_size * self.METER_TO_PIXEL_SCALE
 
             # Draw grid interior.
             with canvas:
                 Color(rgba=self.grid_line_color)
 
-                while width > grid_spacing:
+                while temp_width > grid_spacing:
                     Line(width=self.grid_line_width,
                          points=(self.pos[0] + iterations * grid_spacing,
                                  0,
                                  self.pos[0] + iterations * grid_spacing,
-                                 self.squared_size))
-                    width -= grid_spacing
+                                 width))
+                    temp_width -= grid_spacing
                     iterations += 1
                 iterations = 0
 
-                while height > grid_spacing:
+                while temp_height > grid_spacing:
                     Line(width=self.grid_line_width,
                          points=(0,
                                  self.pos[1] + iterations * grid_spacing,
-                                 self.squared_size,
+                                 height,
                                  self.pos[1] + iterations * grid_spacing))
-                    height -= grid_spacing
+                    temp_height -= grid_spacing
                     iterations += 1
 
             # Draw grid outline.
             with self.canvas.after:
                 Color(self.grid_outline_color)
-                Line(width=self.grid_outline_width, rectangle=(0, 0, self.squared_size, self.squared_size))
+                Line(width=self.grid_outline_width, rectangle=(0, 0, width, height))
 
     def draw_coordinates(self):
+        """
+
+        :return:
+        """
         return
