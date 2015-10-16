@@ -1,5 +1,9 @@
+import os
 import math
 import copy
+import shutil
+
+from pathlib import Path
 
 from .cell import Cell
 from .goal import Goal
@@ -16,20 +20,117 @@ planning the motion of the robot.
 
 
 class Map:
-    """
-    Initialises the Map based on the parameters provided.
-    """
+    def __init__(self, robot, grid_size, cell_size, file=None):
+        """
 
-    def __init__(self, robot, grid_size, cell_size):
+        :param robot:
+        :param grid_size:
+        :param cell_size:
+        :return:
+        """
         self.robot = robot                                                  # The robot traversing this map.
         self.grid_size = grid_size                                          # Size in meters down either side.
         self.cell_size = cell_size                                          # Cell size in meters.
         self.grid = []                                                      # Contains a list of columns, treated like a 2D array.
         self.path = []                                                      # Calculated path to follow.
-        self.cells_square = int(round(self.grid_size / self.cell_size, 0))  # Number of cells down either side of the grid.
-        self.goal = Goal(self.cells_square - 2 ,self.cells_square - 2)      # Goal position.
+        self.file = file
+        self.cells_square = 0
 
+        if self.file is not None:
+            self.open()
+        else:
+            self.cells_square = int(round(self.grid_size / self.cell_size, 0))  # Number of cells down either side of the grid.
+            self.goal = Goal(self.cells_square - 2 ,self.cells_square - 2)      # Goal position.
+            self.populate_grid()
+
+    def open(self):
+        """
+
+        :return:
+        """
+        print("opening map: " + str(self.file))
+
+        infile = Path(self.file).open()
+
+        # Do not bother with any validation for now.
+        self.grid_size = float(infile.readline())
+        self.cell_size = float(infile.readline())
+        self.robot.cell_size = self.cell_size
+
+        self.cells_square = int(round(self.grid_size / self.cell_size, 0))  # Number of cells down either side of the grid.
         self.populate_grid()
+
+        y = self.cells_square - 1
+
+        while y >= 0:
+            line = infile.readline()
+
+            for x in range(self.cells_square):
+                if line[x] == "#":
+                    self.grid[x][y].state = 1
+                elif line[x] == "R":
+                    self.robot.change_odometry(round(x * self.cell_size, 2), round(y * self.cell_size, 2), 1.57)
+                    self.robot.x = 1
+                    self.robot.y = 1
+                    '''
+                    print("Waiting for odometry change...")
+
+                    # Wait for odometry change to take affect.
+                    while self.robot.x != round(x * self.cell_size, 2) and self.robot.y != round(y * self.cell_size, 2):
+                        continue
+
+                    print("Odometry change successful!")
+                    '''
+                elif line[x] == "G":
+                    self.goal = Goal(x, y)
+                elif line[x] == " ":
+                    self.grid[x][y].state = 0
+
+            y -= 1
+
+        infile.close()
+
+    def save(self):
+        """
+
+        :return:
+        """
+        print("saving map: " + str(self.file))
+
+        shutil.copy(self.file, self.file + ".tmp")
+
+        try:
+            os.remove(self.file)
+
+            outfile = Path(self.file)
+            outfile.touch()
+            outfile = outfile.open("w+")
+
+            # Do not bother with any validation for now.
+            outfile.write(str(self.grid_size) + "\n")
+            outfile.write(str(self.cell_size) + "\n")
+
+            y = self.cells_square - 1
+
+            while y >= 0:
+                for x in range(self.cells_square):
+                    if x == self.robot.x and y == self.robot.y:
+                        outfile.write("R")
+                    elif x == self.goal.x and y == self.goal.y:
+                        outfile.write("G")
+                    else:
+                        if self.grid[x][y].state == 0:
+                            outfile.write(" ")
+                        else:
+                            outfile.write("#")
+                outfile.write(str("\n"))
+                y -= 1
+
+            outfile.close()
+            os.remove(self.file + ".tmp")
+        except IOError as err:
+            print(str(err))
+            os.rename(self.file + "tmp", self.file)
 
     def populate_grid(self):
         """
@@ -40,7 +141,10 @@ class Map:
             column = []
 
             for y in range(self.cells_square):
-                column.append(Cell(x, y, "", 0))  # Add a free cell.
+                if x == 0 or y == 0 or x == self.cells_square - 1 or y == self.cells_square - 1:
+                    column.append(Cell(x, y, "", 1))  # Add a free cell.
+                else:
+                    column.append(Cell(x, y, "", 0))  # Add a free cell.
 
             self.grid.append(column)
 
@@ -159,7 +263,7 @@ class Map:
         if robot_position == -1:
             found_robot = True
 
-        for y in self.cells_square:
+        for y in range(self.cells_square):
             x = 0
             header += "    " + str(y)
             rows += str(y) + " "

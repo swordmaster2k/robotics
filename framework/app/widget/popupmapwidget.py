@@ -15,7 +15,7 @@ class PopupMapWidget(GridLayout):
 
         self.result = (None, None, None)
 
-        self.size_text_input = NumericTextInput((10, 50), text="10")
+        self.size_text_input = NumericTextInput((10, 50), text="3")
         self.cell_text_input = NumericTextInput((0.1, 1.0), True, text="0.3")
 
         self.ok_button = Button(text="OK")

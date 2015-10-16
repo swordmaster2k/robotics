@@ -91,7 +91,7 @@ class SimulatedRobot(Robot):
     def change_odometry(self, x, y, heading):
         self.x = x
         self.y = y
-        self.heading
+        self.heading = heading
         self.trail.append([self.get_cell_x(), self.get_cell_y()])
 
     '''
