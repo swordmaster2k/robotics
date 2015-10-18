@@ -1,15 +1,14 @@
 from kivy.app import App
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.filechooser import FileChooserIconView
 
 from framework.app.widget.mapwidget import MapWidget
 from framework.app.widget.toolbarwidget import ToolbarWidget
 from framework.app.widget.panelwidget import PanelWidget
 from framework.app.widget.popupmapwidget import PopupMapWidget
+from framework.app.widget.filewidget import FileWidget
 
 from framework.model.map import Map
-from framework.model.robot import Robot
 from framework.model.simulated_robot import SimulatedRobot
 
 
@@ -30,7 +29,6 @@ class RobotApp(App):
         self.toolbar_widget = None
         self.horizontal_layout = None
         self.vertical_layout = None
-        self.file_chooser = None
 
         self.popup = None
 
@@ -67,23 +65,31 @@ class RobotApp(App):
                            auto_dismiss=True)
         self.popup.open()
 
-    def open_map(self, instance, selection, touch):
-        map_model = Map(self.robot, None, None, str(selection[0]))
-
+    def open_map(self, instance):
+        map_model = Map(self.robot, None, None, str(self.popup.file_input.text))
         self.map_widget.set_map(map_model)
-        self.horizontal_layout.remove_widget(self.file_chooser)
-        self.horizontal_layout.add_widget(self.map_widget, index=1)
-        self.file_chooser = None
 
-    def save_map(self):
+        self.horizontal_layout.remove_widget(self.popup)
+        self.horizontal_layout.add_widget(self.map_widget, index=1)
+
+    def save_map(self, instance):
+        self.map_widget.map_model.file = self.popup.file_input.text
         self.map_widget.map_model.save()
+
+        self.horizontal_layout.remove_widget(self.popup)
+        self.horizontal_layout.add_widget(self.map_widget, index=1)
 
     def show_open_dialog(self):
         self.horizontal_layout.remove_widget(self.map_widget)
 
-        self.file_chooser = FileChooserIconView()
-        self.file_chooser.bind(on_submit=self.open_map)
-        self.horizontal_layout.add_widget(self.file_chooser, index=1)
+        self.popup = FileWidget(self.open_map, self.cancel_dialog, "Open")
+        self.horizontal_layout.add_widget(self.popup, index=1)
+
+    def show_save_dialog(self):
+        self.horizontal_layout.remove_widget(self.map_widget)
+
+        self.popup = FileWidget(self.save_map, self.cancel_dialog, "Save")
+        self.horizontal_layout.add_widget(self.popup, index=1)
 
     def on_popup_ok_button(self, instance):
         content = self.popup.content
@@ -93,3 +99,7 @@ class RobotApp(App):
 
     def on_popup_cancel_button(self, instance):
         self.popup.dismiss()
+
+    def cancel_dialog(self, instance):
+        self.horizontal_layout.remove_widget(self.popup)
+        self.horizontal_layout.add_widget(self.map_widget, index=1)

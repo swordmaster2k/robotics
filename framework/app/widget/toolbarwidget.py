@@ -63,7 +63,10 @@ class ToolbarWidget(BoxLayout):
         self.app.show_open_dialog()
 
     def save_button_on_press(self, instance):
-        self.app.save_map()
+        if self.app.map_widget.map_model.file is None:
+            self.app.show_save_dialog()
+        else:
+            self.app.map_widget.map_model.save()
 
     def start_button_on_press(self, instance):
         self.app.brush = "start"
