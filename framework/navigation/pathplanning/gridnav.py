@@ -103,7 +103,7 @@ class GridNav(AbstractAlgorithm):
                         (y == 0) or (y == (self.map_state.cells_square - 1))):
                     data.occupancy = self.FULL
                     data.scheduled = self.SCHEDULED
-                elif x == self.map_state.goal_x and y == self.map_state.goal_y:
+                elif x == self.map_state.goal.x and y == self.map_state.goal.y:
                     data.cost = 0
                 elif self.map_state.grid[x][y].state == 2:
                     data.occupancy = self.FULL
@@ -204,7 +204,7 @@ class GridNav(AbstractAlgorithm):
             return False
 
         # Check if it's the goal.
-        if (x == self.map_state.goal_x) and (y == self.map_state.goal_y):
+        if (x == self.map_state.goal.x) and (y == self.map_state.goal.y):
             self.map_state.grid[x][y].data.cost = 0
             return False
 
@@ -275,7 +275,7 @@ class GridNav(AbstractAlgorithm):
         self.total_plan_steps += 1
         start_time = time.process_time()
 
-        self.insert_node(self.map_state.goal_x, self.map_state.goal_y, 0.0)
+        self.insert_node(self.map_state.goal.x, self.map_state.goal.y, 0.0)
 
         while self.open_head != self.EMPTY:
             result = self.pop_node()
@@ -387,8 +387,8 @@ class GridNav(AbstractAlgorithm):
 
         self.path.append([next_x, next_y])
 
-        x_difference = self.map_state.goal_x - next_x
-        y_difference = self.map_state.goal_y - next_y
+        x_difference = self.map_state.goal.x - next_x
+        y_difference = self.map_state.goal.y - next_y
 
         if 0.5 >= x_difference >= -0.5 and 0.5 >= y_difference >= -0.5:
             return
@@ -438,7 +438,7 @@ class GridNav(AbstractAlgorithm):
             if ((cell.x == 0) or (cell.x == (self.map_state.cells_square - 1)) or
                     (cell.y == 0) or (cell.y == (self.map_state.cells_square - 1))):
                 continue
-            elif cell.x == self.map_state.goal_x and cell.y == self.map_state.goal_y:
+            elif cell.x == self.map_state.goal.x and cell.y == self.map_state.goal.y:
                 continue
 
             occupancy = self.map_state.grid[cell.x][cell.y].data.occupancy
@@ -554,7 +554,7 @@ class GridNav(AbstractAlgorithm):
 
                 if x == int(self.robot.get_cell_x()) and y == int(self.robot.get_cell_y()):
                     symbol = "ROBOT"
-                elif x == self.map_state.goal_x and y == self.map_state.goal_y:
+                elif x == self.map_state.goal.x and y == self.map_state.goal.y:
                     symbol = "GOAL "
                 elif grid[x][y].data.occupancy == self.FULL:
                     symbol = "#####"

@@ -41,23 +41,6 @@ class MapWidget(Widget):
         self.robot = None
         self.path = []
         self.goal = None
-        self.create_new_map(3, 0.3)
-
-    def create_new_map(self, grid_size, cell_size):
-        """
-
-        :param grid_size:
-        :param cell_size:
-        :return:
-        """
-        self.robot = Robot()
-        self.robot.x = 1
-        self.robot.y = 1
-        self.path = []
-        self.map_model = Map(self.robot, grid_size, cell_size)
-        self.goal = self.map_model.goal
-
-        self.draw()
 
     def set_map(self, map_model):
         """

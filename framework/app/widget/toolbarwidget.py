@@ -78,7 +78,7 @@ class ToolbarWidget(BoxLayout):
         self.app.brush = "obstacle"
 
     def run_button_on_press(self, instance):
-        print("run/pause")
+        self.app.run_plan()
 
     def stop_button_on_press(self, instance):
-        print("stop")
+        self.app.stop()

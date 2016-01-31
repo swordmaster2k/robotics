@@ -2,6 +2,9 @@ from kivy.app import App
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 
+from framework.navigation.pathplanning.gridnav import GridNav
+
+from framework.app.state import State
 from framework.app.widget.mapwidget import MapWidget
 from framework.app.widget.toolbarwidget import ToolbarWidget
 from framework.app.widget.panelwidget import PanelWidget
@@ -20,16 +23,22 @@ class RobotApp(App):
     def __init__(self):
         App.__init__(self)
 
+        # Model
         self.robot = SimulatedRobot(None)
+        self.robot.x = 1
+        self.robot.y = 1
 
+        self.map_model = Map(self.robot, 3, 0.3)
+        self.planner = GridNav(self.map_model)
         self.brush = "start"
+        self.state = State.default
 
+        # View
         self.map_widget = None
         self.panel_widget = None
         self.toolbar_widget = None
         self.horizontal_layout = None
         self.vertical_layout = None
-
         self.popup = None
 
     def build(self):
@@ -38,6 +47,8 @@ class RobotApp(App):
         :return:
         """
         self.map_widget = MapWidget(self)
+        self.map_widget.set_map(self.map_model)
+
         self.panel_widget = PanelWidget()
         self.toolbar_widget = ToolbarWidget(self, orientation="horizontal")
 
@@ -72,6 +83,8 @@ class RobotApp(App):
         self.horizontal_layout.remove_widget(self.popup)
         self.horizontal_layout.add_widget(self.map_widget, index=1)
 
+        self.reset_state()
+
     def save_map(self, instance):
         self.map_widget.map_model.file = self.popup.file_input.text
         self.map_widget.map_model.save()
@@ -79,23 +92,33 @@ class RobotApp(App):
         self.horizontal_layout.remove_widget(self.popup)
         self.horizontal_layout.add_widget(self.map_widget, index=1)
 
-    def show_open_dialog(self):
-        self.horizontal_layout.remove_widget(self.map_widget)
+        self.reset_state()
 
-        self.popup = FileWidget(self.open_map, self.cancel_dialog, "Open")
-        self.horizontal_layout.add_widget(self.popup, index=1)
+    def show_open_dialog(self):
+        if self.state == State.default:
+            self.horizontal_layout.remove_widget(self.map_widget)
+
+            self.popup = FileWidget(self.open_map, self.cancel_dialog, "Open")
+            self.horizontal_layout.add_widget(self.popup, index=1)
+
+            self.state = State.opening
 
     def show_save_dialog(self):
-        self.horizontal_layout.remove_widget(self.map_widget)
+        if self.state == State.default:
+            self.horizontal_layout.remove_widget(self.map_widget)
 
-        self.popup = FileWidget(self.save_map, self.cancel_dialog, "Save")
-        self.horizontal_layout.add_widget(self.popup, index=1)
+            self.popup = FileWidget(self.save_map, self.cancel_dialog, "Save")
+            self.horizontal_layout.add_widget(self.popup, index=1)
+
+            self.state = State.saving
 
     def on_popup_ok_button(self, instance):
         content = self.popup.content
 
         self.popup.dismiss()
-        self.map_widget.create_new_map(float(content.size_text_input.text), float(content.cell_text_input.text))
+
+        self.map_model = Map(self.robot, float(content.size_text_input.text), float(content.cell_text_input.text))
+        self.map_widget.set_map(self.map_model)
 
     def on_popup_cancel_button(self, instance):
         self.popup.dismiss()
@@ -103,3 +126,17 @@ class RobotApp(App):
     def cancel_dialog(self, instance):
         self.horizontal_layout.remove_widget(self.popup)
         self.horizontal_layout.add_widget(self.map_widget, index=1)
+
+        self.reset_state()
+
+    def reset_state(self):
+        self.state = State.default
+
+    def run_plan(self):
+        self.planner.plan()
+        self.map_model.path = self.planner.path
+        self.map_widget.path = self.planner.path
+        self.map_widget.draw()
+
+    def stop(self):
+        return
