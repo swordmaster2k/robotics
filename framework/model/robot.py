@@ -1,32 +1,33 @@
 import math
-import time
 
-'''
-A generic Robot class which (may) represent(s) a hardware robot that 
-implements the communications interface defined by the robonav tool.
-It is possible to use this class for simulations where no hardware
-robot exists.
-
-It can communicate with a hardware robot using Bluetooth, WiFi, 
-Ethernet, Serial, InfraRed, etc. using the abstracted connection
-approach.
-
-This class keeps track of the robots position, orientation, the path it
-has traversed, physical dimensions, state, and the cell resolution
-it is operating in.
-
-It does not matter if the robot is a wheeled, tracked, bipod, etc. as 
-long as the hardware conforms to the generic interface required by
-the robonav tool. 
-'''
+from framework.events.events import OdometryReport
+from framework.util.listener import Listener
+from framework.util.notifier import Notifier
 
 
-class Robot:
-    '''
-    Initialises the robot using the connection specified.
-    '''
+class Robot(Listener, Notifier):
+    """
+    A generic Robot class which (may) represent(s) a hardware robot that
+    implements the communications interface defined by the robonav tool.
+    It is possible to use this class for simulations where no hardware
+    robot exists.
+
+    It can communicate with a hardware robot using Bluetooth, WiFi,
+    Ethernet, Serial, InfraRed, etc. using the abstracted connection
+    approach.
+
+    This class keeps track of the robots position, orientation, the path it
+    has traversed, physical dimensions, state, and the cell resolution
+    it is operating in.
+
+    It does not matter if the robot is a wheeled, tracked, bipod, etc. as
+    long as the hardware conforms to the generic interface required by
+    the robonav tool.
+    """
 
     def __init__(self, connection=None):
+        Notifier.__init__(self)
+
         # Data connection to robot.
         self.connection = connection
 
@@ -46,6 +47,14 @@ class Robot:
 
         # Size of the cells we are operating in.
         self.cell_size = 0.15
+
+    def handle_event(self, event):
+        """
+
+        :param event:
+        :return:
+        """
+        self.update_odometry(event)
 
     '''
     Gets the robots x position in cells.
@@ -228,5 +237,6 @@ class Robot:
 
         if changed:
             self.trail.append([self.get_cell_x(), self.get_cell_y()])
+            self.notify_listeners(update)
 
         return changed

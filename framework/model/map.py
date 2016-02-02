@@ -8,18 +8,20 @@ from pathlib import Path
 from .cell import Cell
 from .goal import Goal
 
-'''
-A Map containing a 2D grid of cells of a specified size. The size of the
-grid is in meters, the number of cells in the grid is calculated using
-the grids size and the size of individual cells.
-
-The Map also contains the robot operatin on it and the location of the
-goal. Path planners can use the data in each cell of the grid for 
-planning the motion of the robot.
-'''
+from framework.util.notifier import Notifier
 
 
-class Map:
+class Map(Notifier):
+    """
+    A Map containing a 2D grid of cells of a specified size. The size of the
+    grid is in meters, the number of cells in the grid is calculated using
+    the grids size and the size of individual cells.
+
+    The Map also contains the robot operatin on it and the location of the
+    goal. Path planners can use the data in each cell of the grid for
+    planning the motion of the robot.
+    """
+
     def __init__(self, robot, grid_size, cell_size, file=None):
         """
 
@@ -28,6 +30,8 @@ class Map:
         :param cell_size:
         :return:
         """
+        Notifier.__init__(self)
+
         self.robot = robot                                                  # The robot traversing this map.
         self.grid_size = grid_size                                          # Size in meters down either side.
         self.cell_size = cell_size                                          # Cell size in meters.
@@ -147,6 +151,15 @@ class Map:
                     column.append(Cell(x, y, "", 0))  # Add a free cell.
 
             self.grid.append(column)
+
+    def set_goal_position(self, x, y):
+        self.goal.x = x
+        self.goal.y = y
+        self.notify_listeners(self)
+
+    def set_cell_state(self, x, y):
+        self.grid[x][y].state ^= 1
+        self.notify_listeners(self)
 
     def ping_to_cells(self, distance):
         """

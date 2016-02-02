@@ -105,7 +105,7 @@ class GridNav(AbstractAlgorithm):
                     data.scheduled = self.SCHEDULED
                 elif x == self.map_state.goal.x and y == self.map_state.goal.y:
                     data.cost = 0
-                elif self.map_state.grid[x][y].state == 2:
+                elif self.map_state.grid[x][y].state == 1:
                     data.occupancy = self.FULL
 
                 self.map_state.grid[x][y].data = data
@@ -445,9 +445,7 @@ class GridNav(AbstractAlgorithm):
 
             if cell.state == 0 and occupancy != self.EMPTY:
                 self.map_state.grid[cell.x][cell.y].data.occupancy = self.EMPTY
-            elif cell.state == 1 and occupancy != self.EMPTY:
-                self.map_state.grid[cell.x][cell.y].data.occupancy = self.EMPTY
-            elif cell.state == 2 and occupancy != self.FULL:
+            elif cell.state == 1 and occupancy != self.FULL:
                 self.map_state.grid[cell.x][cell.y].data.occupancy = self.FULL
 
     def print_cost_grid(self, stream):
