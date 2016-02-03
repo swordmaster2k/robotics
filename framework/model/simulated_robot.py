@@ -1,8 +1,9 @@
-import math
 import random
+import time
 
 from .robot import Robot
-from events import ScanResult
+from framework.event.events import ScanResult
+from framework.event.events import OdometryReport
 
 '''
 A generic Robot class which (may) represent(s) a hardware robot that 
@@ -99,10 +100,14 @@ class SimulatedRobot(Robot):
     '''
 
     def go_to(self, x, y):
-        self.x = (x + random.uniform(-0.2, 0.2)) * self.cell_size  # Introduce a little uncertainty.
-        self.y = (y + random.uniform(-0.2, 0.2)) * self.cell_size
+        self.x = x * self.cell_size
+        self.y = y * self.cell_size
 
         self.trail.append([self.get_cell_x(), self.get_cell_y()])
 
         self.state = "Travelled"
+
+        time.sleep(1)
+
+        self.notify_listeners(OdometryReport(self.x, self.y, self.heading))
 

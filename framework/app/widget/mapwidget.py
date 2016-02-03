@@ -35,7 +35,6 @@ class MapWidget(Widget, Listener):
         self.METER_TO_PIXEL_SCALE = 100
 
         self.app = app
-
         self.map_model = None
 
     def handle_event(self, event):
@@ -84,7 +83,7 @@ class MapWidget(Widget, Listener):
 
         self.draw_cells(canvas)
 
-        if len(self.map_model.path) > 0:
+        if len(self.map_model.path.points) > 0:
             self.draw_path(canvas)
 
         self.draw_grid(canvas)
@@ -118,22 +117,22 @@ class MapWidget(Widget, Listener):
         """
         cell_size = self.map_model.cell_size * self.METER_TO_PIXEL_SCALE
 
-        for i in range(len(self.map_model.path) - 1):
+        for i in range(len(self.map_model.path.points) - 1):
             with canvas:
                 Color(rgba=self.path_line_color)
                 Line(width=self.path_line_width,
-                     points=(self.map_model.path[i][0] * cell_size,
-                             self.map_model.path[i][1] * cell_size,
-                             self.map_model.path[i + 1][0] * cell_size,
-                             self.map_model.path[i + 1][1] * cell_size))
+                     points=(self.map_model.path.points[i][0] * cell_size,
+                             self.map_model.path.points[i][1] * cell_size,
+                             self.map_model.path.points[i + 1][0] * cell_size,
+                             self.map_model.path.points[i + 1][1] * cell_size))
 
                 Color(rgba=self.path_point_color)
-                Rectangle(pos=(self.map_model.path[i][0] * cell_size - 2.5, self.map_model.path[i][1] * cell_size - 2.5),
+                Rectangle(pos=(self.map_model.path.points[i][0] * cell_size - 2.5, self.map_model.path.points[i][1] * cell_size - 2.5),
                           size=(5, 5))
 
         with canvas:
-            Rectangle(pos=(self.map_model.path[len(self.map_model.path) - 1][0] * cell_size - 2.5,
-                           self.map_model.path[len(self.map_model.path) - 1][1] * cell_size - 2.5),
+            Rectangle(pos=(self.map_model.path.points[len(self.map_model.path.points) - 1][0] * cell_size - 2.5,
+                           self.map_model.path.points[len(self.map_model.path.points) - 1][1] * cell_size - 2.5),
                       size=(5, 5))
 
     def draw_grid(self, canvas):

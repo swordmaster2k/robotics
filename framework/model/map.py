@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .cell import Cell
 from .goal import Goal
+from .path import Path
 
 from framework.util.notifier import Notifier
 
@@ -36,7 +37,7 @@ class Map(Notifier):
         self.grid_size = grid_size                                          # Size in meters down either side.
         self.cell_size = cell_size                                          # Cell size in meters.
         self.grid = []                                                      # Contains a list of columns, treated like a 2D array.
-        self.path = []                                                      # Calculated path to follow.
+        self.path = Path([])                                                      # Calculated path to follow.
         self.file = file
         self.cells_square = 0
 

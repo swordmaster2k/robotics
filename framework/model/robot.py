@@ -1,6 +1,6 @@
 import math
 
-from framework.events.events import OdometryReport
+from framework.event.events import OdometryReport
 from framework.util.listener import Listener
 from framework.util.notifier import Notifier
 

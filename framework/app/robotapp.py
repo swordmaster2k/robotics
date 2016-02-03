@@ -13,9 +13,10 @@ from framework.app.widget.filewidget import FileWidget
 
 from framework.model.map import Map
 from framework.model.simulated_robot import Robot
-from framework.events.events import OdometryReport
+from framework.event.events import OdometryReport
 from framework.io.proxy import Proxy
 from framework.io.bluetooth_connection import BluetoothConnection
+from framework.navigation.planner import Planner
 
 
 class RobotApp(App):
@@ -36,15 +37,17 @@ class RobotApp(App):
         self.proxy.start()
 
         # Model
-        self.robot = Robot(None)
+        self.robot = Robot(self.connection)
+        self.robot.cell_size = 0.3
         self.robot.x = 0.3
         self.robot.y = 0.3
-        self.robot.cell_size = 0.3
 
         self.map_model = Map(self.robot, 3.0, 0.3)
-        self.planner = GridNav(self.map_model)
-        self.brush = "start"
         self.state = State.default
+        self.brush = "start"
+
+        self.planning_algorithm = GridNav(self.map_model)
+        self.planner = Planner(self.robot, self.map_model, self.planning_algorithm, self.proxy)
 
         # View
         self.map_widget = None
@@ -84,7 +87,10 @@ class RobotApp(App):
         return
 
     def on_stop(self):
-        self.connection.close()
+        try:
+            self.connection.close()
+        except Exception as ex:
+            print(ex)
 
     def setup_listeners(self):
         """
@@ -93,6 +99,7 @@ class RobotApp(App):
         """
         self.proxy.listeners.append(self.robot)
         self.map_model.listeners.append(self.map_widget)
+        self.map_model.path.listeners.append(self.map_widget)
         self.robot.listeners.append(self.map_widget)
 
     def create_new_map(self):
@@ -207,16 +214,32 @@ class RobotApp(App):
 
         :return:
         """
-        self.robot.x += 0.3
-        self.robot.y += 0.3
+        self.plan()
+
+        if self.planner.finished:
+            self.planner.start()
 
     def stop_plan(self):
         """
 
         :return:
         """
-        return
+        if not self.planner.finished:
+            self.planner.finished = True
 
+    def plan(self):
+        """
+
+        :return:
+        """
+        self.planning_algorithm = GridNav(self.map_model)
+        self.planning_algorithm.plan()
+
+        self.map_model.path.update_points(self.planning_algorithm.path)
+
+    '''
+    Move this out of here.
+    '''
     def handle_touch_down(self, x, y):
         """
 
@@ -235,11 +258,3 @@ class RobotApp(App):
 
         self.plan()
 
-    def plan(self):
-        """
-
-        :return:
-        """
-        self.planner = GridNav(self.map_model)
-        self.planner.plan()
-        self.map_model.path = self.planner.path
