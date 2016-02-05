@@ -1,5 +1,5 @@
 from threading import Thread
-from events import OdometryReport, ScanResult, StateEvent
+from framework.event.events import OdometryReport, ScanResult, StateEvent
 
 
 class Proxy(Thread):

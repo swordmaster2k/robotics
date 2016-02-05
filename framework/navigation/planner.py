@@ -36,7 +36,7 @@ class Planner(Thread):
         self.robot.listeners.append(self)
         self.map.listeners.append(self)
 
-        self.finished = False
+        self.finished = True
         self.last_scan = None
 
         Thread.__init__(self)
@@ -67,6 +67,8 @@ class Planner(Thread):
         :return: none
         """
 
+        self.finished = False
+
         try:
             '''
             Step 1: Plan.
@@ -88,10 +90,10 @@ class Planner(Thread):
                 '''
                 Step 2: Scan the immediate area for obstacles and free space.
                 '''
-                self.robot.ping()
+                #self.robot.ping()
 
-                while self.last_scan is None:
-                    continue
+                #while self.last_scan is None:
+                #    continue
 
                 # Just take 1 reading for now.
                 affected_cells = []

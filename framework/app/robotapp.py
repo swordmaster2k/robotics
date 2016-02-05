@@ -37,7 +37,7 @@ class RobotApp(App):
         self.proxy.start()
 
         # Model
-        self.robot = Robot(self.connection)
+        self.robot = Robot(self.proxy)
         self.robot.cell_size = 0.3
         self.robot.x = 0.3
         self.robot.y = 0.3
@@ -87,10 +87,7 @@ class RobotApp(App):
         return
 
     def on_stop(self):
-        try:
-            self.connection.close()
-        except Exception as ex:
-            print(ex)
+        return
 
     def setup_listeners(self):
         """
@@ -98,9 +95,10 @@ class RobotApp(App):
         :return:
         """
         self.proxy.listeners.append(self.robot)
+
+        self.robot.listeners.append(self.map_widget)
         self.map_model.listeners.append(self.map_widget)
         self.map_model.path.listeners.append(self.map_widget)
-        self.robot.listeners.append(self.map_widget)
 
     def create_new_map(self):
         """

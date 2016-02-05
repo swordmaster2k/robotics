@@ -1,6 +1,6 @@
 import math
 
-from framework.event.events import OdometryReport
+from framework.event.events import OdometryReport, StateEvent
 from framework.util.listener import Listener
 from framework.util.notifier import Notifier
 
@@ -54,7 +54,10 @@ class Robot(Listener, Notifier):
         :param event:
         :return:
         """
-        self.update_odometry(event)
+        if isinstance(event, OdometryReport):
+            self.update_odometry(event)
+        elif isinstance(event, StateEvent):
+            self.state = event.state
 
     '''
     Gets the robots x position in cells.
