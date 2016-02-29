@@ -1,7 +1,66 @@
 #:kivy 1.9.0
 
 <ToolbarWidget>:
-  size_hint: 1, 0.1
+  size_hint: 1, 0.12
+  Button:
+    size_hint_x: None
+    size_hint_y: None
+    width: 48
+    height: 48
+    on_press: app.toolbar_widget.new_button_on_press()
+    background_normal: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/new.png"
+  Button:
+    size_hint_x: None
+    size_hint_y: None
+    width: 48
+    height: 48
+    on_press: app.toolbar_widget.open_button_on_press()
+    background_normal: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/open.png"
+  Button:
+    size_hint_x: None
+    size_hint_y: None
+    width: 48
+    height: 48
+    on_press: app.toolbar_widget.save_button_on_press()
+    background_normal: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/save.png"
+  ToggleButton:
+    size_hint_x: None
+    size_hint_y: None
+    width: 48
+    height: 48
+    on_press: app.toolbar_widget.start_button_on_press()
+    background_normal: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/start.png"
+    background_down: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/start_down.png"
+  ToggleButton:
+    size_hint_x: None
+    size_hint_y: None
+    width: 48
+    height: 48
+    on_press: app.toolbar_widget.goal_button_on_press()
+    background_normal: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/goal.png"
+    background_down: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/goal_down.png"
+  ToggleButton:
+    size_hint_x: None
+    size_hint_y: None
+    width: 48
+    height: 48
+    on_press: app.toolbar_widget.obstacle_button_on_press()
+    background_normal: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/edit.png"
+    background_down: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/edit_down.png"
+  Button:
+    size_hint_x: None
+    size_hint_y: None
+    width: 48
+    height: 48
+    on_press: app.toolbar_widget.run_button_on_press()
+    background_normal: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/run.png"
+  Button:
+    size_hint_x: None
+    size_hint_y: None
+    width: 48
+    height: 48
+    on_press: app.toolbar_widget.stop_button_on_press()
+    background_normal: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/stop.png"
 
 <PanelWidget>:
   size_hint: 0.25, 1

@@ -32,7 +32,7 @@ class RobotApp(App):
         App.__init__(self)
 
         # Connection
-        self.connection = BluetoothConnection("00:00:12:06:56:83", 0x1001)
+        self.connection = "DUMMY"
         self.proxy = Proxy(self.connection)
         self.proxy.start()
 
