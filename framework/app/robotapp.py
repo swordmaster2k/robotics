@@ -13,6 +13,7 @@ from framework.app.widget.filewidget import FileWidget
 
 from framework.model.map import Map
 from framework.model.simulated_robot import Robot
+from framework.model.simulated_robot import SimulatedRobot
 from framework.event.events import OdometryReport
 from framework.io.proxy import Proxy
 from framework.io.bluetooth_connection import BluetoothConnection
@@ -37,7 +38,7 @@ class RobotApp(App):
         self.proxy.start()
 
         # Model
-        self.robot = Robot(self.proxy)
+        self.robot = SimulatedRobot(self.proxy)
         self.robot.cell_size = 0.3
         self.robot.x = 0.3
         self.robot.y = 0.3
@@ -67,7 +68,7 @@ class RobotApp(App):
         self.map_widget = MapWidget(self)
         self.map_widget.set_map(self.map_model)
 
-        self.panel_widget = PanelWidget()
+        self.panel_widget = PanelWidget(self)
         self.toolbar_widget = ToolbarWidget(self, orientation="horizontal")
 
         self.horizontal_layout = BoxLayout(orientation="horizontal")
@@ -215,6 +216,7 @@ class RobotApp(App):
         self.plan()
 
         if self.planner.finished:
+            self.planner = Planner(self.robot, self.map_model, self.planning_algorithm, self.proxy)
             self.planner.start()
 
     def stop_plan(self):

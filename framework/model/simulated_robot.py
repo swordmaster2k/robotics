@@ -1,4 +1,3 @@
-import random
 import time
 
 from .robot import Robot

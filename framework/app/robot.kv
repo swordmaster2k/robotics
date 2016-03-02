@@ -28,6 +28,7 @@
     size_hint_y: None
     width: 48
     height: 48
+    group: "brush"
     on_press: app.toolbar_widget.start_button_on_press()
     background_normal: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/start.png"
     background_down: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/start_down.png"
@@ -36,6 +37,7 @@
     size_hint_y: None
     width: 48
     height: 48
+    group: "brush"
     on_press: app.toolbar_widget.goal_button_on_press()
     background_normal: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/goal.png"
     background_down: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/goal_down.png"
@@ -44,6 +46,7 @@
     size_hint_y: None
     width: 48
     height: 48
+    group: "brush"
     on_press: app.toolbar_widget.obstacle_button_on_press()
     background_normal: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/edit.png"
     background_down: "/home/joshua/Documents/Projects/Robotics/robotics/framework/app/icon/edit_down.png"
@@ -64,3 +67,24 @@
 
 <PanelWidget>:
   size_hint: 0.25, 1
+  cols: 2
+  rows: 3
+  Label:
+    text: "Enable Bluetooth"
+  CheckBox:
+    on_active: app.panel_widget.enable_checkbox_on_active(self)
+  Label:
+    text: "MAC Address"
+  TextInput:
+    id: mac_address_textinput
+    disabled: True
+  Button:
+    id: connect_button
+    text: "Connect"
+    disabled: True
+    on_press: app.panel_widget.connect_button_on_press()
+  Button:
+    id: disconnect_button
+    text: "Disconnect"
+    disabled: True
+    on_press: app.panel_widget.disconnect_button_on_press()

@@ -1,6 +1,4 @@
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.togglebutton import ToggleButton
 
 
 class ToolbarWidget(BoxLayout):

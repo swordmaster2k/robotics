@@ -116,6 +116,7 @@ class MapWidget(Widget, Listener):
         :return:
         """
         cell_size = self.map_model.cell_size * self.METER_TO_PIXEL_SCALE
+        half_cell_size = cell_size / 2
 
         for i in range(len(self.map_model.path.points) - 1):
             with canvas:
@@ -126,10 +127,13 @@ class MapWidget(Widget, Listener):
                              self.map_model.path.points[i + 1][0] * cell_size,
                              self.map_model.path.points[i + 1][1] * cell_size))
 
+                # Way point.
                 Color(rgba=self.path_point_color)
-                Rectangle(pos=(self.map_model.path.points[i][0] * cell_size - 2.5, self.map_model.path.points[i][1] * cell_size - 2.5),
+                Rectangle(pos=(self.map_model.path.points[i][0] * cell_size - 2.5,
+                               self.map_model.path.points[i][1] * cell_size - 2.5),
                           size=(5, 5))
 
+        # Last point in the path.
         with canvas:
             Rectangle(pos=(self.map_model.path.points[len(self.map_model.path.points) - 1][0] * cell_size - 2.5,
                            self.map_model.path.points[len(self.map_model.path.points) - 1][1] * cell_size - 2.5),
