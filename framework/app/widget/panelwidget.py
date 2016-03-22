@@ -16,7 +16,10 @@ class PanelWidget(GridLayout):
         self.ids["mac_address_textinput"].disabled = not checkbox.active
 
     def connect_button_on_press(self):
-        print("connect")
+        mac_address = self.ids["mac_address_textinput"].text
+
+        if mac_address:
+            self.app.connect_bluetooth(mac_address)
 
     def disconnect_button_on_press(self):
         print("disconnect")

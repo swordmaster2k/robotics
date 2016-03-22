@@ -90,6 +90,27 @@ class RobotApp(App):
     def on_stop(self):
         return
 
+    def connect_bluetooth(self, mac_address):
+        try:
+            self.connection = BluetoothConnection(mac_address, 0x1001)
+            self.proxy = Proxy(self.connection)
+            self.proxy.start()
+
+            self.robot = Robot(self.proxy)
+            self.robot.cell_size = 0.3
+            self.robot.x = 0.3
+            self.robot.y = 0.3
+
+            self.map_model.listeners.clear()
+            self.map_model.path.listeners.clear()
+
+            self.setup_listeners()
+        except OSError as err:
+            print(err)
+
+    def disconnect_bluetooth(self):
+        pass
+
     def setup_listeners(self):
         """
 
