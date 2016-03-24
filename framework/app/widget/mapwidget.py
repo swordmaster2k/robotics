@@ -1,6 +1,8 @@
 from kivy.uix.widget import Widget
 from kivy.graphics import Color, Line, Rectangle
 from kivy.properties import NumericProperty, ListProperty, StringProperty
+from kivy.graphics.vertex_instructions import Triangle
+from kivy.graphics.context_instructions import Rotate
 
 from framework.util.listener import Listener
 
@@ -86,6 +88,8 @@ class MapWidget(Widget, Listener):
         if len(self.map_model.path.points) > 0:
             self.draw_path(canvas)
 
+        self.draw_robot(canvas)
+
         self.draw_grid(canvas)
 
     def draw_cells(self, canvas):
@@ -99,8 +103,6 @@ class MapWidget(Widget, Listener):
                 for y in range(self.map_model.cells_square):
                     if x == self.map_model.goal.x and y == self.map_model.goal.y:
                         Color(rgba=self.cell_goal_color)
-                    elif x == self.map_model.robot.get_cell_x() and y == self.map_model.robot.get_cell_y():
-                        Color(rgba=self.cell_robot_color)
                     elif self.map_model.grid[x][y].state == 0:
                         Color(rgba=self.cell_empty_color)
                     else:
@@ -138,6 +140,18 @@ class MapWidget(Widget, Listener):
             Rectangle(pos=(self.map_model.path.points[len(self.map_model.path.points) - 1][0] * cell_size - 2.5,
                            self.map_model.path.points[len(self.map_model.path.points) - 1][1] * cell_size - 2.5),
                       size=(5, 5))
+
+    def draw_robot(self, canvas):
+        cell_size = self.map_model.cell_size * self.METER_TO_PIXEL_SCALE
+
+        heading = self.map_model.robot.heading
+        print(heading)
+        x1 = self.map_model.robot.get_cell_x() * cell_size
+        y1 = self.map_model.robot.get_cell_y() * cell_size
+
+        with canvas:
+            Color(rgba=self.cell_robot_color)
+            Triangle(points=[x1,y1, x1 + 15, y1 + 30, x1 + 30, y1])
 
     def draw_grid(self, canvas):
         """

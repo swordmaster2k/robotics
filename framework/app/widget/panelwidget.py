@@ -22,4 +22,4 @@ class PanelWidget(GridLayout):
             self.app.connect_bluetooth(mac_address)
 
     def disconnect_button_on_press(self):
-        print("disconnect")
+        self.app.disconnect_bluetooth()

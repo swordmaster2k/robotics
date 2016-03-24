@@ -109,7 +109,8 @@ class RobotApp(App):
             print(err)
 
     def disconnect_bluetooth(self):
-        pass
+        self.stop_plan()
+        self.connection.close()
 
     def setup_listeners(self):
         """
