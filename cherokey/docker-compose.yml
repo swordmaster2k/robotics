@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+
+  ros:
+    build: .
+    tty: true
+    volumes:
+      - ./:/home/ros/app
+    ports:
+      - "3389:3389"
+    environment:
+      - DISPLAY=host.docker.internal:0.0
+
+networks:
+  default:
+    name: ros
+    external: true
